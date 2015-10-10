@@ -3,40 +3,34 @@ getData <- function(zipFile) {
 # Purpose:
 #   To get and clean the Household Power Consumption dataset in 'zipFile'
 
-        # Get dataset file name
+        # Get raw data
 
         hpcFile <- unzip(zipFile)
-
-        # Get raw data
 
         colClasses <- c(rep("character", 2), rep("numeric", 7))
         hpcData <- read.table(hpcFile, header = TRUE, sep = ";", 
                 colClasses = colClasses, na.strings = "?")
 
-        # Reformat 'Date'
+        # Reformat 'Date' in 'Date1'
 
-        hpcData$d <- as.Date(hpcData$Date, "%d/%m/%Y")
+        hpcData$Date1 <- as.Date(hpcData$Date, "%d/%m/%Y")
 
-        # Select data from 01-02 Feb 2007
+        # Extract observations from 01-02 Feb 2007
 
-        hpcData <- subset(hpcData, year(hpcData$d) == 2007)
-        hpcData <- subset(hpcData, month(hpcData$d) == 2)
-        hpcData <- subset(hpcData, mday(hpcData$d) == 1 | mday(hpcData$d) == 2)
+        hpcData <- subset(hpcData, year(hpcData$Date1) == 2007)
+        hpcData <- subset(hpcData, month(hpcData$Date1) == 2)
+        hpcData <- subset(hpcData, mday(hpcData$Date1) == 1 | mday(hpcData$Date1) == 2)
 
-        # Combine 'd' and 'Time' into new 'Date'
+        # Combine 'Date1' and 'Time' into new 'Clock'
 
-        hpcData$Date <- strptime(paste(as.character(hpcData$d), hpcData$Time, " "), 
+        hpcData$Clock <- strptime(paste(as.character(hpcData$Date1), hpcData$Time, " "), 
                 format = "%Y-%m-%d %H:%M:%S")
 
         # Clean up
 
+        hpcData$Date <- NULL
         hpcData$Time <- NULL
-        hpcData$d <- NULL
-
-        # Rename 'Date' column
-
-        n <- length(names(hpcData))
-        names(hpcData) <- c("Clock", names(hpcData)[2:n])
+        hpcData$Date1 <- NULL
 
         return(hpcData)        
 }
